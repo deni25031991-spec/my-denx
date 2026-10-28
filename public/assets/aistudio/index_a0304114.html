@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<script>
+  (function() {
+    try {
+      var _f = window.fetch;
+      Object.defineProperty(window, 'fetch', {
+        get: function() { return _f; },
+        set: function(v) { _f = v; },
+        configurable: true,
+        enumerable: true
+      });
+    } catch(e) {}
+  })();
+</script>
+<title>Deni Angga Raja — Guru PAK</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3b6cf2">
+<meta name="description" content="Portofolio Deni Angga Raja, S.Pd.K. — guru Pendidikan Agama Kristen dan pembuat media belajar interaktif.">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+<button class="hb" id="hb" aria-label="Menu" aria-expanded="false"><span></span></button>
+<button class="snd" id="snd" aria-label="Suara" aria-pressed="false">🔇</button>
+<div id="menu"></div>
+<div class="bub" id="bub" role="status" aria-live="polite"><div class="tag">DENI</div><p id="txt"></p><div class="ft"><div class="dots" id="dots"></div><button id="next"></button></div></div>
+<button class="mas" id="mas" aria-label="Maskot: buka atau tutup balon ucapan"><i style="left:17px"></i><i style="left:33px"></i></button>
+<button id="bk">01 &nbsp;Kembali ke Mulai ↑</button>
+<div id="ld" role="status" aria-label="Memuat"><div class="iris"><div class="mini"><i></i><i></i><i></i></div><span class="hi">hai</span></div><p id="ldt">meracik cat…</p><button id="go" hidden>Mulai ▸</button></div>
+<div id="track"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stats-js@1.0.1/build/stats.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

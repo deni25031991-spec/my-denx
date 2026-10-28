@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<script>
+  (function() {
+    try {
+      var _f = window.fetch;
+      Object.defineProperty(window, 'fetch', {
+        get: function() { return _f; },
+        set: function(v) { _f = v; },
+        configurable: true,
+        enumerable: true
+      });
+    } catch(e) {}
+  })();
+</script>
+<title>Deni Angga Raja — Guru PAK</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3b6cf2">
+<meta name="description" content="Portofolio Deni Angga Raja, S.Pd.K. — guru Pendidikan Agama Kristen dan pembuat media belajar interaktif.">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a1a4a;--card:#fffaf3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#f4f1ff;--card:#241f4a}}
+:root[data-theme="dark"]{--ink:#f4f1ff;--card:#241f4a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var(--ink);background:linear-gradient(#3b6cf2,#6aa8ff 55%,#d9b8f5)}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+#track{height:900vh}
+.hb,.snd{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;z-index:6}
+.hb{left:16px;width:56px;height:56px;background:rgba(36,66,200,.78)}
+.hb span{display:block;width:26px;height:4px;border-radius:3px;background:#fff;box-shadow:0 -9px #fff,0 9px #fff}
+.snd{right:16px;width:44px;height:44px;background:#fff;font-size:20px;box-shadow:2px 2px 0 #8fe7ff,-2px -2px 0 #ff8ad0}
+#menu{position:fixed;top:calc(82px + env(safe-area-inset-top,0px));left:16px;display:none;flex-direction:column;gap:8px;z-index:6}
+#menu.on{display:flex}
+#menu button{font:800 16px 'Nunito',system-ui,sans-serif;text-align:left;border:2.5px solid var(--ink);border-radius:999px;padding:8px 18px;background:var(--card);color:var(--ink);cursor:pointer;box-shadow:3px 3px 0 #8fe7ff}
+.mas{position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;background:#fff;border:0;padding:0;cursor:pointer;box-shadow:2px 2px 0 #8fe7ff,-2px -2px 0 #ff8ad0;z-index:5}
+.mas i{position:absolute;top:21px;width:8px;height:13px;border-radius:50%;background:#3b3fb0}
+.bub{position:fixed;left:18px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:max-content;min-width:min(250px,calc(100vw - 36px));max-width:min(400px,calc(100vw - 36px));background:radial-gradient(rgba(26,26,74,.09) 1px,transparent 1.3px) 0 0/4px 4px,var(--card);border:2px solid var(--ink);border-radius:18px;padding:18px 18px 10px;box-shadow:3px 3px 0 #8fe7ff,-1px -1px 0 #ff8ad0;z-index:5;transform:rotate(-1deg)}
+.bub::before,.bub::after{content:'';position:absolute;clip-path:polygon(0 0,100% 0,0 100%)}
+.bub::before{left:20px;bottom:-30px;width:38px;height:30px;background:var(--ink)}
+.bub::after{left:23px;bottom:-24px;width:30px;height:25px;background:var(--card)}
+.tag{position:absolute;left:12px;top:-12px;background:var(--ink);color:var(--card);font:800 10px 'Courier New',monospace;letter-spacing:.22em;padding:3px 9px;border-radius:5px;border:2px solid #ff5fb0}
+.bub p{margin:0 0 8px;font-weight:800;font-size:clamp(14px,1.6vw,16px);line-height:1.35}
+.bub a{color:inherit}
+.ft{display:flex;justify-content:flex-end;align-items:center;gap:12px}
+.dots{display:flex;gap:6px}
+.dots b{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--ink)}
+.dots b.on{background:var(--ink)}
+#next{font:900 11px 'Nunito',system-ui,sans-serif;letter-spacing:.1em;background:var(--ink);color:var(--card);border:0;border-radius:999px;padding:6px 12px;cursor:pointer;box-shadow:1.5px 1.5px 0 #8fe7ff}
+#bk{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:6;font:900 20px 'Nunito',system-ui,sans-serif;background:var(--card);color:var(--ink);border:2.5px solid var(--ink);border-radius:999px;padding:12px 22px;cursor:pointer;box-shadow:4px 4px 0 #8fe7ff,-2px -2px 0 #ff8ad0;opacity:0;pointer-events:none;transition:opacity .3s}
+#bk.on{opacity:1;pointer-events:auto}
+.hb:focus-visible,.snd:focus-visible,.mas:focus-visible,#next:focus-visible,#bk:focus-visible,#menu button:focus-visible,.bub a:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}
+@keyframes pop{from{transform:rotate(-1deg) scale(.94);opacity:.4}to{transform:rotate(-1deg);opacity:1}}
+.bub.pop{animation:pop .25s ease-out}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.h{visibility:hidden}
+.mas.hand i{display:none}
+.mas.hand::after{content:'👆';font-size:26px;position:absolute;inset:0;display:grid;place-items:center}
+#ld{position:fixed;inset:0;z-index:20;background:#2f55e8;color:#fff}
+.iris{position:absolute;left:50%;top:44%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:4px solid #1a1a4a;background:linear-gradient(#4a78f5,#bdb2f6);box-shadow:0 0 0 3px #fff}
+.mini{position:absolute;left:50%;top:50%;transform:translate(-50%,-42%);width:96px;height:42px;background:#f5b335;border-radius:10px;display:flex;gap:6px;align-items:center;justify-content:center}
+.mini i{width:24px;height:24px;border-radius:50%;background:#3b1c3a;box-shadow:inset 0 0 0 3px #7a3a40}
+.mini i:last-child{background:#2f9e3f;box-shadow:inset 0 0 0 3px #6cf03a}
+.hi{position:absolute;left:-12px;top:-8px;background:#5fd8ff;color:#1a1a4a;font-weight:900;font-size:15px;padding:5px 10px;border-radius:14px;border:2px solid #1a1a4a;animation:bobh 1.4s ease-in-out infinite}
+@keyframes bobh{50%{transform:translateY(-5px)}}
+#ldt{position:absolute;left:0;right:0;top:calc(44% + 102px);text-align:center;margin:0;font-weight:800;font-size:15px;letter-spacing:.12em;opacity:.8}
+#go{position:absolute;left:50%;top:calc(44% + 138px);transform:translateX(-50%);font:900 18px 'Nunito',system-ui,sans-serif;background:#fffaf3;color:#1a1a4a;border:2.5px solid #1a1a4a;border-radius:999px;padding:10px 26px;cursor:pointer;box-shadow:4px 4px 0 #8fe7ff,-2px -2px 0 #ff8ad0}
+#go:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.bub.pop{animation:none}#bk{transition:none}.hi{animation:none}}
+
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+<button class="hb" id="hb" aria-label="Menu" aria-expanded="false"><span></span></button>
+<button class="snd" id="snd" aria-label="Suara" aria-pressed="false">🔇</button>
+<div id="menu"></div>
+<div class="bub" id="bub" role="status" aria-live="polite"><div class="tag">DENI</div><p id="txt"></p><div class="ft"><div class="dots" id="dots"></div><button id="next"></button></div></div>
+<button class="mas" id="mas" aria-label="Maskot: buka atau tutup balon ucapan"><i style="left:17px"></i><i style="left:33px"></i></button>
+<button id="bk">01 &nbsp;Kembali ke Mulai ↑</button>
+<div id="ld" role="status" aria-label="Memuat"><div class="iris"><div class="mini"><i></i><i></i><i></i></div><span class="hi">hai</span></div><p id="ldt">meracik cat…</p><button id="go" hidden>Mulai ▸</button></div>
+<div id="track"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
