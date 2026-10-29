@@ -405,10 +405,10 @@ function init3d(){
   if(gl){var B=new THREE.BoxGeometry(.55,.3,.1);add(g,B,0x1e1630,-.36,.4,1);add(g,B,0x1e1630,.36,.4,1);add(g,new THREE.BoxGeometry(.3,.07,.08),0x1e1630,0,.45,1)}
   if(hat){add(g,cyl(.85,.85,.1,20),hat,0,.95,0);add(g,cyl(.55,.6,.5,20),hat,0,1.25,0);add(g,cyl(.6,.62,.14,20),0xffffff,0,1.08,0)}
 
-  // Bola hit-proxy transparan/tak terlihat (~1.45x badan) agar raycast mudah mendeteksi hover/touch
+  // Bola hit-proxy transparan (~1.45x badan) agar raycast mudah mendeteksi hover/touch
   var hitProxy=new THREE.Mesh(
    new THREE.SphereGeometry(1.45,14,10),
-   new THREE.MeshBasicMaterial({visible:false,depthWrite:false})
+   new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false})
   );
   hitProxy.position.set(0,0,.1);
   hitProxy.userData.d=g;
@@ -495,10 +495,10 @@ function init3d(){
   d.userData.chirpPitch=850+rnd()*450;
   d.userData.headTwitchTimer=2+rnd()*3;
   d.userData.headTwitchAngle=0;
-  d.userData.flightApex=3.2+rnd()*2.6;
-  d.userData.flightRadius=2.4+rnd()*2.0;
+  d.userData.flightApex=3.6+rnd()*2.4;
+  d.userData.flightRadius=2.8+rnd()*2.2;
   d.userData.flightDir=rnd()<.5?1:-1;
-  d.userData.flyDuration=1.6+rnd()*.4;
+  d.userData.flyDuration=2.4+rnd()*0.8;
   d.userData.takeoffDx=0;
   d.userData.takeoffDz=0;
   d.userData.takeoffAngle=0;
@@ -625,117 +625,116 @@ function init3d(){
  var disco=new THREE.Mesh(new THREE.IcosahedronGeometry(1.3,1),new THREE.MeshLambertMaterial({color:0xe6ecff,flatShading:true}));disco.position.set(PX-10.2,-52.1,.3);S.add(disco);
  var notes=[];['♪','♫','♪','♫'].forEach(function(ch,k){var s=new THREE.Sprite(new THREE.SpriteMaterial({transparent:true,map:cvs(64,64,function(x){x.fillStyle='#ffd24a';x.font='900 52px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(ch,32,34)})}));s.scale.set(1.3,1.3,1);s.userData.k=k;s.position.set(PX-10.2+(k%2?1.7:-1.5),-51,.5);S.add(s);notes.push(s)});
 
- // ─── KONFIGURASI AWAN ────────────────────────────────────────────────────
- var CLOUD_CFG={
-  count:20,          // jumlah awan total di scene
-  scaleMin:2.2,      // skala minimum awan
-  scaleMax:5.5,      // skala maksimum awan
-  speedMin:0.18,     // kecepatan minimum (unit/detik)
-  speedMax:0.52,     // kecepatan maksimum
-  spheresMin:6,      // sphere minimum per awan
-  spheresMax:9,      // sphere maksimum per awan
-  colorTop:new THREE.Color(1,1,1),             // putih di puncak
-  colorBot:new THREE.Color(0.85,0.77,0.97),    // lavender lembut di bawah
-  colorShadow:new THREE.Color(0.78,0.70,0.92), // lavender lebih gelap sisi
-  xMin:-34, xMax:30,   // batas posisi X spawn/reset
-  yMin:-58, yMax:24,   // batas posisi Y
-  zMin:-36, zMax:-5    // kedalaman Z (parallax)
- };
- // ─── MATERIAL AWAN: vertex-color gradient, satu draw call per awan ─────
- var cloudMat=new THREE.ShaderMaterial({
-  vertexColors:true,
-  transparent:true,
-  depthWrite:false,
-  vertexShader:[
-   'attribute vec3 color;',
-   'varying vec3 vCol;',
-   'varying vec3 vNorm;',
-   'void main(){',
-   '  vCol=color;',
-   '  vNorm=normalize(normalMatrix*normal);',
-   '  gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);',
-   '}'
-  ].join('\n'),
-  fragmentShader:[
-   'varying vec3 vCol;',
-   'varying vec3 vNorm;',
-   'void main(){',
-   // soft lambert: wrap lighting so bottom rim still bright
-   '  float wrap=dot(vNorm,vec3(-.25,.6,.4))*.5+.5;',
-   '  vec3 lit=vCol*(0.72+0.28*wrap);',
-   '  gl_FragColor=vec4(lit,1.);',
-   '}'
-  ].join('\n')
- });
- // ─── PEMBUAT GEOMETRI AWAN (per seed) ──────────────────────────────────
- function cloudGeo(seed){
-  // PRNG lokal berbasis seed (LCG)
-  var s=seed+1;
-  function lr(){s=(s*1664525+1013904223)>>>0;return s/4294967296}
-  var nSph=CLOUD_CFG.spheresMin+Math.floor(lr()*(CLOUD_CFG.spheresMax-CLOUD_CFG.spheresMin+1));
-  var geos=[];
-  var cTop=CLOUD_CFG.colorTop,cBot=CLOUD_CFG.colorBot,cShd=CLOUD_CFG.colorShadow;
-  for(var b=0;b<nSph;b++){
-   // posisi: tersebar horizontal, bertumpuk vertikal, bola bawah lebih pipih
-   var t=b/nSph; // 0=tengah bawah, 1=puncak tepi
-   var rx=(lr()-.5)*3.2;   // X acak
-   var ry=lr()*1.8;        // Y: bola selalu di atas nol (bagian bawah datar)
-   var rz=(lr()-.5)*0.8;   // Z sedikit
-   var rad=0.55+lr()*0.75; // radius bola
-   var flatY=THREE.MathUtils.lerp(0.52,0.92,lr()); // pipihkan bawah
-   // bola tengah-bawah lebih besar
-   if(b<3){rx*=0.4;ry*=0.5;rad+=0.3;flatY=Math.min(flatY,0.68)}
-   var geo=new THREE.SphereGeometry(rad,10,8);
-   // scale Y untuk pipih
-   var pos=geo.attributes.position;
-   var nrm=geo.attributes.normal;
-   var cnt=pos.count;
-   var cols=new Float32Array(cnt*3);
-   for(var v=0;v<cnt;v++){
-    // pipihkan bawah: tekan Y negatif
-    var py=pos.getY(v);
-    if(py<0){pos.setY(v,py*flatY)}
-    // vertex color: lerp berdasarkan Y lokal + normal
-    var ny=nrm.getY(v);
-    var fTop=Math.max(0,Math.min(1,(pos.getY(v)/rad)*0.5+0.5+ny*0.2));
-    var fShd=Math.max(0,1.0-fTop*1.4); // lavender lebih gelap sisi bawah
-    var cr=THREE.MathUtils.lerp(cShd.r,cTop.r,fTop);
-    var cg2=THREE.MathUtils.lerp(cShd.g,cTop.g,fTop);
-    var cb=THREE.MathUtils.lerp(cShd.b,cTop.b,fTop);
-    cols[v*3]=cr; cols[v*3+1]=cg2; cols[v*3+2]=cb;
-   }
-   pos.needsUpdate=true;
-   geo.setAttribute('color',new THREE.BufferAttribute(cols,3));
-   // pindahkan bola ke posisinya (bake translate ke geo)
-   geo.translate(rx,ry,rz);
-   geos.push(geo);
+ // ─── KONFIGURASI AWAN PNG TRANSPARAN ──────────────────────────────────
+  var CLOUD_CONFIG = {
+   texturePath: 'awan_54c2d261.png', // Path ke file PNG transparan (rasio 1:1)
+   count: 14,                       // Jumlah total awan di scene (10-14 awan)
+   scaleMin: 4.2,                   // Skala minimum awan
+   scaleMax: 7.8,                   // Skala maksimum awan
+   speedMin: 0.22,                  // Kecepatan horizontal minimum (unit/detik)
+   speedMax: 0.58,                  // Kecepatan horizontal maksimum
+   reducedSpeedFactor: 0.35,        // Faktor kecepatan saat prefers-reduced-motion aktif
+   opacityMin: 0.65,                // Opasitas lapisan jauh (lebih transparan)
+   opacityMax: 0.98,                // Opasitas lapisan dekat (lebih pekat)
+   zMin: -28.0,                     // Kedalaman terjauh
+   zMax: -8.0,                      // Kedalaman terdekat (selalu di belakang objek foreground)
+   xMin: -36.0,                     // Batas X spawn / wrap
+   xMax: 32.0,                      // Batas X keluar layar kanan
+   yMin: -56.0,                     // Batas Y bawah (sepanjang jalur scroll vertikal)
+   yMax: 24.0,                      // Batas Y atas
+   sineAmp: 0.35,                   // Amplitudo goyangan vertikal sinus lembut
+   sineFreq: 0.85,                  // Frekuensi goyangan sinus
+   renderOrderBase: -25,            // renderOrder negatif agar di belakang burung, tiang, dan lampu
+   tints: [                         // Tint warna halus (putih ke lavender)
+    0xffffff,                       // Putih murni
+    0xfbfaff,                       // Putih sejuk
+    0xf5eeff,                       // Lavender sangat lembut
+    0xede3ff,                       // Lavender pastel
+    0xe4d6fa                        // Lavender lembut
+   ]
+  };
+
+  // Muat tekstur awan SEKALI via TextureLoader
+  var cloudTex = new THREE.TextureLoader().load(CLOUD_CONFIG.texturePath);
+  if (THREE.SRGBColorSpace) cloudTex.colorSpace = THREE.SRGBColorSpace;
+  else if (THREE.sRGBEncoding) cloudTex.encoding = THREE.sRGBEncoding;
+  cloudTex.generateMipmaps = true;
+  cloudTex.minFilter = THREE.LinearMipmapLinearFilter;
+  cloudTex.magFilter = THREE.LinearFilter;
+  if (R && R.capabilities) {
+   cloudTex.anisotropy = Math.min(R.capabilities.getMaxAnisotropy() || 1, 8);
   }
-  // Merge semua sphere menjadi 1 BufferGeometry → 1 draw call
-  var merged=THREE.BufferGeometryUtils
-   ?THREE.BufferGeometryUtils.mergeBufferGeometries(geos,false)
-   :geos[0]; // fallback jika utils tidak tersedia
-  // Hilangkan index untuk kompatibilitas max
-  if(!merged)merged=geos[0];
-  geos.forEach(function(g){g.dispose()});
-  return merged;
- }
- // ─── BUAT 5 TEMPLATE BENTUK AWAN ───────────────────────────────────────
- var cloudShapes=[];
- for(i=0;i<5;i++){cloudShapes.push(cloudGeo(i*731+17))}
- // ─── SEBAR AWAN DI SCENE ───────────────────────────────────────────────
- var clouds=[];
- for(i=0;i<CLOUD_CFG.count;i++){
-  var cShape=cloudShapes[i%cloudShapes.length];
-  var cMesh=new THREE.Mesh(cShape,cloudMat);
-  var cScale=CLOUD_CFG.scaleMin+rnd()*(CLOUD_CFG.scaleMax-CLOUD_CFG.scaleMin);
-  cMesh.scale.setScalar(cScale);
-  cMesh.position.set(
-   CLOUD_CFG.xMin+rnd()*(CLOUD_CFG.xMax-CLOUD_CFG.xMin),
-   CLOUD_CFG.yMin+rnd()*(CLOUD_CFG.yMax-CLOUD_CFG.yMin),
-   CLOUD_CFG.zMin+rnd()*(CLOUD_CFG.zMax-CLOUD_CFG.zMin));
-  cMesh.userData.v=CLOUD_CFG.speedMin+rnd()*(CLOUD_CFG.speedMax-CLOUD_CFG.speedMin);
-  cMesh.frustumCulled=true;
-  S.add(cMesh);clouds.push(cMesh)}
+
+  // Gunakan SATU material transparan untuk semua awan
+  var cloudMat = new THREE.MeshBasicMaterial({
+   map: cloudTex,
+   transparent: true,
+   depthWrite: false,
+   alphaTest: 0.01,
+   vertexColors: true
+  });
+
+  // Buat awan dari PlaneGeometry (1:1 sesuai rasio asli PNG 1024x1024 agar tidak gepeng)
+  var clouds = [];
+  for (i = 0; i < CLOUD_CONFIG.count; i++) {
+   // Distribusi kedalaman dalam beberapa layer (jauh: kecil, transparan, lambat; dekat: besar, jelas, cepat)
+   var layerT = i / Math.max(1, CLOUD_CONFIG.count - 1);
+   var depthNorm = Math.min(1, Math.max(0, layerT + (rnd() - 0.5) * 0.16));
+
+   var cZ = CLOUD_CONFIG.zMin + depthNorm * (CLOUD_CONFIG.zMax - CLOUD_CONFIG.zMin);
+   var cScaleBase = THREE.MathUtils.lerp(CLOUD_CONFIG.scaleMin, CLOUD_CONFIG.scaleMax, depthNorm);
+   var cScale = cScaleBase * (0.9 + rnd() * 0.2);
+   var cOpacity = THREE.MathUtils.lerp(CLOUD_CONFIG.opacityMin, CLOUD_CONFIG.opacityMax, depthNorm);
+   var cSpeed = THREE.MathUtils.lerp(CLOUD_CONFIG.speedMin, CLOUD_CONFIG.speedMax, depthNorm);
+
+   // Tint warna halus (putih ke lavender)
+   var tintHex = CLOUD_CONFIG.tints[Math.floor(rnd() * CLOUD_CONFIG.tints.length)];
+   var tintCol = new THREE.Color(tintHex);
+
+   var cGeo = new THREE.PlaneGeometry(1, 1);
+   var colAttr = new Float32Array(16);
+   for (var vi = 0; vi < 4; vi++) {
+    colAttr[vi * 4] = tintCol.r;
+    colAttr[vi * 4 + 1] = tintCol.g;
+    colAttr[vi * 4 + 2] = tintCol.b;
+    colAttr[vi * 4 + 3] = cOpacity;
+   }
+   cGeo.setAttribute('color', new THREE.BufferAttribute(colAttr, 4));
+
+   var cMesh = new THREE.Mesh(cGeo, cloudMat);
+
+   // Flip horizontal acak (scale.x negatif untuk 50% awan)
+   var flipH = rnd() < 0.5 ? -1 : 1;
+   cMesh.scale.set(cScale * flipH, cScale, 1);
+
+   var initialX = CLOUD_CONFIG.xMin + rnd() * (CLOUD_CONFIG.xMax - CLOUD_CONFIG.xMin);
+   var initialY = CLOUD_CONFIG.yMin + rnd() * (CLOUD_CONFIG.yMax - CLOUD_CONFIG.yMin);
+   cMesh.position.set(initialX, initialY, cZ);
+
+   // Urutkan renderOrder menurut kedalaman (selalu negatif, di belakang burung, tiang, & lampu)
+   cMesh.renderOrder = CLOUD_CONFIG.renderOrderBase + Math.floor(depthNorm * 10);
+
+   cMesh.userData = {
+    speed: cSpeed,
+    scaleBase: cScaleBase,
+    baseY: initialY,
+    sineAmp: CLOUD_CONFIG.sineAmp * (0.8 + rnd() * 0.4),
+    sineFreq: CLOUD_CONFIG.sineFreq * (0.85 + rnd() * 0.3),
+    sinePhase: rnd() * Math.PI * 2,
+    opacity: cOpacity,
+    tint: tintHex
+   };
+
+   // Fallback per-mesh parameter update
+   cMesh.onBeforeRender = function(renderer, scene, camera, geometry, material) {
+    material.opacity = this.userData.opacity;
+    material.color.setHex(this.userData.tint);
+   };
+
+   cMesh.frustumCulled = true;
+   S.add(cMesh);
+   clouds.push(cMesh);
+  }
  // ─── awan, lantai awan, pesawat, bintang (lanjut) ──────────────────────
  add(S,sph(1),0xffffff,PX,-59.2,0).scale.set(45,2.4,40);add(S,sph(1),0xe4bff5,PX,-61.4,0).scale.set(48,2.6,44);
  var pln=new THREE.Group();add(pln,new THREE.ConeGeometry(.42,1.7,3),0xffffff).rotation.z=-Math.PI/2;add(pln,new THREE.BoxGeometry(.5,.08,1.6),0xffd9ec,-.1,0,0);pln.scale.setScalar(1.4);pln.rotation.z=.1;S.add(pln);
@@ -820,7 +819,7 @@ function init3d(){
   var u=d.userData;
   u.state='SIT';
   u.stateTime=0;
-  u.cooldown=0.6;
+  u.cooldown=1.2;
   u.delayedStart=0;
   u.nonSitTime=0;
   d.position.set(u.origX,u.origY,u.origZ);
@@ -839,21 +838,59 @@ function init3d(){
   rc.setFromCamera(mv,cam);
  }
 
- function triggerDove(d,hitWorldPoint){
+ var _doveScreenVec=new THREE.Vector3();
+ var _doveWorldVec=new THREE.Vector3();
+
+ function checkDoveScreenDistance(px,py,isDirectTap){
+  var topEl=document.elementFromPoint(px,py);
+  if(isInteractiveUI(topEl))return false;
+
+  var rect=cv.getBoundingClientRect();
+  var w=rect.width||innerWidth;
+  var h=rect.height||innerHeight;
+  var canvasPx=px-rect.left;
+  var canvasPy=py-rect.top;
+
+  var anyHovered=false;
+  var threshold=isDirectTap?120:95;
+
+  for(var i=0;i<doves.length;i++){
+   var d=doves[i];
+   var u=d.userData;
+   d.getWorldPosition(_doveWorldVec);
+   _doveScreenVec.copy(_doveWorldVec).project(cam);
+
+   if(_doveScreenVec.z>-1.0&&_doveScreenVec.z<1.0){
+    var sx=(_doveScreenVec.x*0.5+0.5)*w;
+    var sy=(-_doveScreenVec.y*0.5+0.5)*h;
+    var dist=Math.hypot(canvasPx-sx,canvasPy-sy);
+
+    if(dist<threshold){
+     anyHovered=true;
+     if(u.state==='SIT'&&u.cooldown<=0&&u.delayedStart<=0){
+      console.log('[Merpati] Kursor terdeteksi (jarak: '+Math.round(dist)+'px)! Burung #'+(i+1)+' mulai terbang.');
+      triggerDove(d,null,{
+       screenDx:sx-canvasPx,
+       screenDy:sy-canvasPy,
+       dist:dist
+      });
+     }
+    }
+   }
+  }
+  return anyHovered;
+ }
+
+ function triggerDove(d,hitWorldPoint,screenInfo){
   var u=d.userData;
   if(u.state!=='SIT'||u.cooldown>0)return;
-  if(reduce){
-   u.state='REDUCED_REACT';
-   u.stateTime=0;
-   u.cooldown=0.6;
-   chirp(u.chirpPitch);
-   u.cuitTime=0.75;
-   if(u.cuit)u.cuit.visible=true;
-   return;
-  }
+
   d.getWorldPosition(_wp);
   var dx=0,dz=0;
-  if(hitWorldPoint){
+  if(screenInfo){
+   dx=(screenInfo.screenDx!==0)?(screenInfo.screenDx>0?1:-1):((Math.random()-.5)*2);
+   dz=1.0;
+  }else if(hitWorldPoint){
    dx=_wp.x-hitWorldPoint.x;
    dz=_wp.z-hitWorldPoint.z;
   }
@@ -866,10 +903,10 @@ function init3d(){
    dx/=len;
    dz/=len;
   }
-  dz=Math.max(dz,0.4);
+  dz=Math.max(dz,0.45);
   var finalLen=Math.sqrt(dx*dx+dz*dz);
-  u.takeoffDx=(dx/finalLen)*(1.8+Math.random()*1.2);
-  u.takeoffDz=(dz/finalLen)*(1.8+Math.random()*1.2);
+  u.takeoffDx=(dx/finalLen)*(2.2+Math.random()*1.2);
+  u.takeoffDz=(dz/finalLen)*(2.0+Math.random()*1.2);
   u.takeoffAngle=Math.atan2(u.takeoffDx,u.takeoffDz);
 
   u.state='STARTLE';
@@ -882,8 +919,8 @@ function init3d(){
     var ou=o.userData;
     if(ou.state==='SIT'&&ou.cooldown<=0&&ou.delayedStart<=0){
      var distSq=(ou.origX-u.origX)*(ou.origX-u.origX)+(ou.origY-u.origY)*(ou.origY-u.origY)+(ou.origZ-u.origZ)*(ou.origZ-u.origZ);
-     if(distSq<9.5&&Math.random()<0.60){
-      ou.delayedStart=0.03+Math.random()*0.22;
+     if(distSq<12.0&&Math.random()<0.60){
+      ou.delayedStart=0.04+Math.random()*0.24;
       ou.takeoffDx=u.takeoffDx+(Math.random()-.5)*.8;
       ou.takeoffDz=u.takeoffDz+(Math.random()-.5)*.8;
       ou.takeoffAngle=Math.atan2(ou.takeoffDx,ou.takeoffDz);
@@ -898,17 +935,22 @@ function init3d(){
  },{passive:true});
 
  window.addEventListener('pointerdown',function(e){
-  if(e.pointerType==='touch'){
-   var topEl=document.elementFromPoint(e.clientX,e.clientY);
-   if(isInteractiveUI(topEl))return;
-   rayAt(e.clientX,e.clientY);
-   hitsHov.length=0;
-   rc.intersectObjects(hov,false,hitsHov);
-   if(hitsHov.length&&hitsHov[0].object.userData.d){
-    triggerDove(hitsHov[0].object.userData.d,hitsHov[0].point);
+  mx=e.clientX;my=e.clientY;
+  var topEl=document.elementFromPoint(e.clientX,e.clientY);
+  if(isInteractiveUI(topEl))return;
+  checkDoveScreenDistance(e.clientX,e.clientY,true);
+ },{passive:true});
+
+ window.addEventListener('touchstart',function(e){
+  if(e.touches&&e.touches.length>0){
+   var cx=e.touches[0].clientX,cy=e.touches[0].clientY;
+   mx=cx;my=cy;
+   var topEl=document.elementFromPoint(cx,cy);
+   if(!isInteractiveUI(topEl)){
+    checkDoveScreenDistance(cx,cy,true);
    }
   }
- });
+ },{passive:true});
 
  window.addEventListener('click',function(e){
   var topEl=document.elementFromPoint(e.clientX,e.clientY);
@@ -918,7 +960,7 @@ function init3d(){
   rc.intersectObjects(clk,false,hitsClk);
   rc.intersectObjects(hov,false,hitsHov);
   if(hitsClk[0]&&hitsClk[0].object.userData.fn)hitsClk[0].object.userData.fn(hitsClk[0]);
-  if(hitsHov[0]&&hitsHov[0].object.userData.d)triggerDove(hitsHov[0].object.userData.d,hitsHov[0].point);
+  checkDoveScreenDistance(e.clientX,e.clientY,true);
  });
 
  document.addEventListener('visibilitychange',function(){
@@ -943,13 +985,12 @@ function init3d(){
   if(flip){flip.t+=dt*5;if(flip.t>=1&&cardIdx!==flip.to){cardIdx=flip.to;cm.map=texs[cardIdx];cm.needsUpdate=true}
    if(flip.t>=2){flip=null;card.scale.x=1}else card.scale.x=Math.max(.02,flip.t<1?1-flip.t:flip.t-1)}
   acc+=dt;if(si===5&&acc>.13){acc=0;snkTick()}
-  if(mouseMoved&&(now-lastHoverRayTime>=33)){
+  if(now-lastHoverRayTime>=33){
    lastHoverRayTime=now;
    mouseMoved=false;
    var topEl=document.elementFromPoint(mx,my);
    var overUI=isInteractiveUI(topEl);
    if(overUI){
-    if(DEBUG)console.log('[DEBUG MERPATI] Pointer ('+mx+','+my+') di atas elemen UI: <'+(topEl.tagName||'UI')+'>');
     cv.style.cursor='';
     hoveredBulbKey=null;
    }else{
@@ -957,29 +998,18 @@ function init3d(){
     hitsClk.length=0;hitsHov.length=0;
     rc.intersectObjects(clk,false,hitsClk);
     rc.intersectObjects(hov,false,hitsHov);
-    cv.style.cursor=(hitsClk.length||hitsHov.length)?'pointer':'';
     hoveredBulbKey=(hitsClk.length&&hitsClk[0].object.userData.isTrafficBulb)?hitsClk[0].object.userData.bulbKey:null;
 
-    var reason='';
-    if(hitsHov.length===0){
-     reason='tidak kena raycast';
-    }else{
+    var isDoveHovered=checkDoveScreenDistance(mx,my,false);
+    if(hitsHov.length&&hitsHov[0].object.userData.d){
      var dHit=hitsHov[0].object.userData.d;
-     var du=dHit?dHit.userData:null;
-     if(!du){
-      reason='objek bukan merpati';
-     }else if(du.state!=='SIT'){
-      reason='sudah terbang ('+du.state+')';
-     }else if(du.cooldown>0){
-      reason='masih cooldown ('+du.cooldown.toFixed(2)+'s)';
-     }else{
+     if(dHit.userData.state==='SIT'&&dHit.userData.cooldown<=0){
+      console.log('[Merpati] Raycast langsung mengenai hitbox! Burung mulai terbang.');
       triggerDove(dHit,hitsHov[0].point);
-      reason=reduce?'reduce-motion aktif (lompatan kecil + cuit)':'BERHASIL LEPAS LANDAS!';
      }
+     isDoveHovered=true;
     }
-    if(DEBUG){
-     console.log('[DEBUG MERPATI] Pointer: ('+mx+','+my+') | Hits: '+hitsHov.length+' | Status: '+reason);
-    }
+    cv.style.cursor=(hitsClk.length||isDoveHovered)?'pointer':'';
    }
   }
   // Animasi lampu lalu lintas interaktif: napas halus, emissive pulse, dan hover damping
@@ -1003,11 +1033,11 @@ function init3d(){
   // Update merpati (6 state machine: DUDUK -> TERKEJUT -> LEPAS LANDAS -> TERBANG -> KEMBALI -> MENDARAT)
   doves.forEach(function(d,j){
    var u=d.userData;
-   // Watchdog timer: jika status selain SIT > 6 detik, paksa reset ke 'SIT' di posisi semula
+   // Watchdog timer: jika status selain SIT > 8 detik, paksa reset ke 'SIT' di posisi semula
    if(u.state!=='SIT'){
     u.nonSitTime=(u.nonSitTime||0)+dt;
-    if(u.nonSitTime>6.0){
-     if(DEBUG)console.warn('[DEBUG MERPATI] Watchdog reset dove #'+j+' setelah >6 detik aktif');
+    if(u.nonSitTime>8.0){
+     if(DEBUG)console.warn('[DEBUG MERPATI] Watchdog reset dove #'+j+' setelah >8 detik aktif');
      resetDove(d);
      if(DEBUG)updateDoveDebugLabel(d);
      return;
@@ -1165,7 +1195,7 @@ function init3d(){
     if(u.stateTime>=0.25){
      u.state='SIT';
      u.stateTime=0;
-     u.cooldown=0.6;
+     u.cooldown=1.4;
      d.position.set(u.origX,u.origY,u.origZ);
      d.rotation.set(0,u.origRotY,0);
      d.scale.setScalar(u.s);
@@ -1185,8 +1215,26 @@ function init3d(){
     if(fp.userData.life<=0)fp.visible=false;
    }
   });
+
+  // Update animasi awan PNG transparan (parallax, delta time, sinus vertikal, seamless wrap)
+  var cloudSpeedFactor = reduce ? CLOUD_CONFIG.reducedSpeedFactor : 1.0;
+  var cloudAmpFactor = reduce ? 0.3 : 1.0;
+  for (var ci = 0; ci < clouds.length; ci++) {
+   var c = clouds[ci];
+   var cu = c.userData;
+   c.position.x += cu.speed * cloudSpeedFactor * dt;
+   c.position.y = cu.baseY + Math.sin(T * cu.sineFreq + cu.sinePhase) * (cu.sineAmp * cloudAmpFactor);
+   if (c.position.x > CLOUD_CONFIG.xMax) {
+    c.position.x = CLOUD_CONFIG.xMin;
+    cu.baseY = CLOUD_CONFIG.yMin + rnd() * (CLOUD_CONFIG.yMax - CLOUD_CONFIG.yMin);
+    c.position.y = cu.baseY;
+    var newScale = cu.scaleBase * (0.88 + rnd() * 0.24);
+    var newFlip = rnd() < 0.5 ? -1 : 1;
+    c.scale.set(newScale * newFlip, newScale, 1);
+   }
+  }
+
   if(!reduce){
-   clouds.forEach(function(c){c.position.x+=c.userData.v*dt;if(c.position.x>CLOUD_CFG.xMax)c.position.x=CLOUD_CFG.xMin});
    hs.position.y=21.4+Math.sin(T*1.6)*.15;pbs.material.map=(T%5<2.5)?bt1:bt2;tbs.material.map=(T%4<2)?tb1:tb2;disco.rotation.y=T*.8;
    notes.forEach(function(s){var f=((T*.6+s.userData.k*.25)%1);s.position.y=-51+f*5;s.material.opacity=1-f});
    pl.t+=dt;if(pl.t>12){pl.t=0;pl.sx=cam.position.x-24;pl.sy=cam.position.y+2+Math.random()*6}
