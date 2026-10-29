@@ -28,7 +28,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var(--ink);background:linear-gradient(#3b6cf2,#6aa8ff 55%,#d9b8f5)}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block}
-#track{height:900vh}
+#track{height:900vh;pointer-events:none}
 .hb,.snd{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;z-index:6}
 .hb{left:16px;width:56px;height:56px;background:rgba(36,66,200,.78)}
 .hb span{display:block;width:26px;height:4px;border-radius:3px;background:#fff;box-shadow:0 -9px #fff,0 9px #fff}
@@ -71,6 +71,36 @@ body{margin:0;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var
 #go:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.bub.pop{animation:none}#bk{transition:none}.hi{animation:none}}
 
+/* Modal Pop-up Lampu Interaktif */
+.modal-backdrop{position:fixed;inset:0;background:rgba(26,26,74,.62);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:50;display:none;place-items:center;padding:16px;opacity:0;transition:opacity .25s ease}
+.modal-backdrop.open{display:grid;opacity:1}
+.modal-dialog{background:radial-gradient(rgba(26,26,74,.07) 1px,transparent 1.3px) 0 0/4px 4px,var(--card);color:var(--ink);border:3px solid var(--ink);border-radius:22px;width:100%;max-width:500px;max-height:min(88vh,680px);overflow-y:auto;box-shadow:6px 6px 0 #8fe7ff,-3px -3px 0 #ff8ad0,0 20px 40px rgba(10,10,35,.35);padding:26px 22px 18px;position:relative;transform:scale(.92) translateY(14px);transition:transform .25s cubic-bezier(.18,.89,.32,1.28)}
+.modal-backdrop.open .modal-dialog{transform:scale(1) translateY(0)}
+.modal-tag{position:absolute;left:18px;top:-13px;background:var(--ink);color:#fff;font:900 11px 'Courier New',monospace;letter-spacing:.2em;padding:4px 12px;border-radius:6px;border:2px solid #ff5fb0;box-shadow:2px 2px 0 rgba(0,0,0,.15)}
+.modal-close{position:absolute;right:14px;top:12px;width:36px;height:36px;border-radius:50%;border:2.5px solid var(--ink);background:#ff5fa2;color:#fff;font:900 16px 'Nunito',sans-serif;display:grid;place-items:center;cursor:pointer;box-shadow:2px 2px 0 var(--ink);transition:transform .15s,background .15s}
+.modal-close:hover{transform:scale(1.1);background:#ff3b4a}
+.modal-close:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}
+.modal-title-row{display:flex;align-items:flex-start;gap:14px;margin-top:6px;margin-bottom:14px}
+.modal-icon{font-size:36px;line-height:1;background:rgba(255,255,255,.9);border:2px solid var(--ink);border-radius:14px;padding:6px;box-shadow:2.5px 2.5px 0 #8fe7ff;flex-shrink:0}
+.modal-title{margin:0;font-size:clamp(19px,2.8vw,23px);font-weight:900;line-height:1.2;color:var(--ink)}
+.modal-subtitle{margin:4px 0 0;font-size:13px;font-weight:800;opacity:.78}
+.modal-desc{margin:0 0 12px;font-size:15px;line-height:1.55;font-weight:800}
+.modal-list{margin:8px 0 14px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.modal-list li{position:relative;padding-left:24px;font-size:14px;line-height:1.45;font-weight:800}
+.modal-list li::before{content:'✦';position:absolute;left:4px;color:#ff5fa2;font-weight:900}
+.modal-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.modal-stat-card{background:rgba(255,255,255,.85);border:2px solid var(--ink);border-radius:12px;padding:8px 10px;box-shadow:2px 2px 0 #8fe7ff}
+.modal-stat-label{display:block;font-size:11px;font-weight:900;opacity:.7;text-transform:uppercase;letter-spacing:.08em}
+.modal-stat-val{display:block;font-size:13px;font-weight:900;color:var(--ink);margin-top:2px}
+.modal-verse{margin:12px 0;padding:10px 14px;background:#f3eeff;border-left:4px solid #7b5cf0;border-radius:0 10px 10px 0;font-size:13.5px;font-style:italic;font-weight:800;line-height:1.45;color:#1a1a4a}
+.modal-note{margin:10px 0 4px;font-size:12.5px;font-weight:800;opacity:.8}
+.modal-footer{margin-top:16px;display:flex;justify-content:flex-end;gap:10px}
+.modal-btn{font:900 14px 'Nunito',system-ui,sans-serif;letter-spacing:.05em;background:#8fe35a;color:var(--ink);border:2.5px solid var(--ink);border-radius:999px;padding:8px 22px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .12s}
+.modal-btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.modal-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.modal-btn:focus-visible{outline:3px solid #ffd24a;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.modal-backdrop,.modal-dialog,.modal-btn{transition:none!important}}
+
 </style>
 </head>
 <body>
@@ -82,6 +112,30 @@ body{margin:0;font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;color:var
 <button class="mas" id="mas" aria-label="Maskot: buka atau tutup balon ucapan"><i style="left:17px"></i><i style="left:33px"></i></button>
 <button id="bk">01 &nbsp;Kembali ke Mulai ↑</button>
 <div id="ld" role="status" aria-label="Memuat"><div class="iris"><div class="mini"><i></i><i></i><i></i></div><span class="hi">hai</span></div><p id="ldt">meracik cat…</p><button id="go" hidden>Mulai ▸</button></div>
+
+<!-- Modal Pop-up Lampu Interaktif -->
+<div id="light-modal-backdrop" class="modal-backdrop" aria-hidden="true">
+  <div id="light-modal" class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="light-modal-title">
+    <div class="modal-header">
+      <div id="light-modal-tag" class="modal-tag">IMAN &amp; PELAYANAN</div>
+      <button id="light-modal-close" class="modal-close" aria-label="Tutup dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title-row">
+        <span id="light-modal-icon" class="modal-icon">✝️</span>
+        <div>
+          <h2 id="light-modal-title" class="modal-title">Visi &amp; Pelayanan PAK</h2>
+          <p id="light-modal-subtitle" class="modal-subtitle">Pendidikan Agama Kristen &amp; Budi Pekerti</p>
+        </div>
+      </div>
+      <div id="light-modal-content" class="modal-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="light-modal-action" class="modal-btn">Tutup &amp; Lanjut ▸</button>
+    </div>
+  </div>
+</div>
+
 <div id="track"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

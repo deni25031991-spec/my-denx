@@ -31,6 +31,30 @@
 <button class="mas" id="mas" aria-label="Maskot: buka atau tutup balon ucapan"><i style="left:17px"></i><i style="left:33px"></i></button>
 <button id="bk">01 &nbsp;Kembali ke Mulai ↑</button>
 <div id="ld" role="status" aria-label="Memuat"><div class="iris"><div class="mini"><i></i><i></i><i></i></div><span class="hi">hai</span></div><p id="ldt">meracik cat…</p><button id="go" hidden>Mulai ▸</button></div>
+
+<!-- Modal Pop-up Lampu Interaktif -->
+<div id="light-modal-backdrop" class="modal-backdrop" aria-hidden="true">
+  <div id="light-modal" class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="light-modal-title">
+    <div class="modal-header">
+      <div id="light-modal-tag" class="modal-tag">IMAN &amp; PELAYANAN</div>
+      <button id="light-modal-close" class="modal-close" aria-label="Tutup dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-title-row">
+        <span id="light-modal-icon" class="modal-icon">✝️</span>
+        <div>
+          <h2 id="light-modal-title" class="modal-title">Visi &amp; Pelayanan PAK</h2>
+          <p id="light-modal-subtitle" class="modal-subtitle">Pendidikan Agama Kristen &amp; Budi Pekerti</p>
+        </div>
+      </div>
+      <div id="light-modal-content" class="modal-content"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="light-modal-action" class="modal-btn">Tutup &amp; Lanjut ▸</button>
+    </div>
+  </div>
+</div>
+
 <div id="track"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
